@@ -37,7 +37,7 @@ const cOSUtil = {
     const currentYear = getYear();
     const finalYear = getYear(50);
 
-    const check55TreesPerYear = (year, purchases, inflationRate = null) => {
+    const check55TreesPerYear = (year, purchases) => {
       // << With more time would make more efficient check (rather than filtering through all purchases on each iteration) >>
       let totalTrees = 0;
       purchases

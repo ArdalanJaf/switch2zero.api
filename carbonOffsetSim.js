@@ -16,11 +16,11 @@ const cOSUtil = require("./util/carbonOffsetSimUtil");
 
 const decimalFix = require("./util/decimalFix");
 
-const data = {
-  annualCO2: 1000,
-  purchases: [{ month: 0, year: 2024, trees: 1 }],
-  inflationRate: "",
-};
+// const data = {
+//   annualCO2: 1000,
+//   purchases: [{ month: 0, year: 2024, trees: 1 }],
+//   inflationRate: "",
+// };
 
 const carbonOffsetSim = (data) => {
   try {
@@ -96,7 +96,7 @@ const carbonOffsetSim = (data) => {
   }
 };
 
-let res = carbonOffsetSim(data);
-console.log(res);
+// let res = carbonOffsetSim(data);
+// console.log(res);
 
 module.exports = carbonOffsetSim;
