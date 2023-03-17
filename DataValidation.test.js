@@ -102,13 +102,13 @@ test("valid data", () => {
 
 test("annualCO2 = string", () => {
   expect(validateData(data.invalid1)).toEqual({
-    annualCO2: "Annual CO2 output must be a number above 0.",
+    annualCO2: "Annual CO2 emmissions must be a number above 0.",
   });
 });
 
 test("annualCO2 = 0", () => {
   expect(validateData(data.invalid2)).toEqual({
-    annualCO2: "Annual CO2 output must be a number above 0.",
+    annualCO2: "Annual CO2 emmissions must be a number above 0.",
   });
 });
 
@@ -164,7 +164,7 @@ test("month not number", () => {
 
 test("combo", () => {
   expect(validateData(data.invalid7)).toEqual({
-    annualCO2: "Annual CO2 output must be a number above 0.",
+    annualCO2: "Annual CO2 emmissions must be a number above 0.",
     purchases: [
       {
         index: 0,

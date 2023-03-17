@@ -1,24 +1,29 @@
 const cOSUtil = {
-  sortPurchases: (purchases) => {
-    // sorts purchases chronologically
-    purchases.sort((tp1, tp2) => {
-      if (Number(tp1.year) < Number(tp2.year)) {
-        return -1;
-      } else if (Number(tp1.year) > Number(tp2.year)) {
-        return 1;
-      } else if (Number(tp1.month) < Number(tp2.month)) {
-        return -1;
-      } else if (Number(tp1.month) > Number(tp2.month)) {
-        return 1;
-      } else return 0;
-    });
+  validateData: (data) => {
+    // validates annualCO2 and purchases, returns true or object of errors
+    let aCO2Error = cOSUtil.annualCO2ErrCheck(data.annualCO2); // return null if no errors, or array of errors
+    let pErrors = cOSUtil.purchasesErrCheck(data.purchases); // return null if no error, or true
+    let iRateErrors = data.inflationRate
+      ? cOSUtil.inflationRateErrCheck(data.inflationRate)
+      : null;
+    let errors = {};
+    if (aCO2Error !== null) errors.annualCO2 = aCO2Error;
+    if (pErrors !== null) errors.purchases = pErrors;
+    if (iRateErrors !== null) errors.inflationRate = iRateErrors;
+    return Object.keys(errors).length > 0 ? errors : true; // true = no errors
+  },
+  annualCO2ErrCheck: (annualCO2) => {
+    // check if annualCO2 is number and above 0, if not return error message.
+    return typeof annualCO2 === "number" && annualCO2 > 0
+      ? null
+      : "Annual CO2 emmissions must be a number above 0.";
   },
   purchasesErrCheck: (purchases) => {
     // validates purchases are correct data type and in correct range, checks max 55 trees a year is purchased.
     const errors = [];
 
-    // <could add check that purchases is array of objects with trees, months, years.>
-    // <could add check that all dates are not in the past.>
+    // << Could add check that purchases is array of objects with trees, months, years.>>
+    // << Could add check that all dates are not in the past >>
 
     const numAndRangeCheck = (value, min, max) => {
       return typeof value === "number" && value >= min && value <= max;
@@ -32,8 +37,8 @@ const cOSUtil = {
     const currentYear = getYear();
     const finalYear = getYear(50);
 
-    const check55TreesPerYear = (year, purchases) => {
-      // <with more time would make more efficient check (rather than filtering through all purchases on each iteration)>
+    const check55TreesPerYear = (year, purchases, inflationRate = null) => {
+      // << With more time would make more efficient check (rather than filtering through all purchases on each iteration) >>
       let totalTrees = 0;
       purchases
         .filter((p) => p.year === year)
@@ -44,11 +49,11 @@ const cOSUtil = {
     purchases.map((p, i) => {
       let pError = {};
 
-      //check month
+      // check month
       if (!numAndRangeCheck(p.month, 0, 11))
         pError.month = "Month must be a number between 0 and 11.";
 
-      //check year
+      // check year
       if (!numAndRangeCheck(p.year, currentYear, finalYear))
         pError.year = `Year must be a number and be between ${currentYear} and ${finalYear}.`;
 
@@ -71,35 +76,228 @@ const cOSUtil = {
     // if errors, return errors arr, else return null.
     return errors.length > 0 ? errors : null;
   },
-  annualCO2ErrCheck: (annualCO2) => {
-    // check if annualCO2 is number and above 0, if not return error message.
-    return typeof annualCO2 === "number" && annualCO2 > 0
+  inflationRateErrCheck: (inflationRate) => {
+    if (!inflationRate) return null;
+    return typeof inflationRate === "number"
       ? null
-      : "Annual CO2 output must be a number above 0.";
+      : "Inflation rate must be a number or empty (for no rate).";
   },
-  validateData: (data) => {
-    // validates annualCO2 and purchases, returns true or object of errors
-    let aCO2Error = cOSUtil.annualCO2ErrCheck(data.annualCO2); // return null if no errors, or array of errors
-    let pErrors = cOSUtil.purchasesErrCheck(data.purchases); // return null if no error, or true
-    let errors = {};
-    if (aCO2Error !== null) errors.annualCO2 = aCO2Error;
-    if (pErrors !== null) errors.purchases = pErrors;
-    return Object.keys(errors).length > 0 ? errors : true; // true = no errors
+  sortPurchases: (purchases) => {
+    // sorts purchases chronologically
+    purchases.sort((tp1, tp2) => {
+      if (tp1.year < tp2.year) {
+        return -1;
+      } else if (tp1.year > tp2.year) {
+        return 1;
+      } else if (tp1.month < tp2.month) {
+        return -1;
+      } else if (tp1.month > tp2.month) {
+        return 1;
+      } else {
+        return 0;
+      }
+    });
+  },
+  findAndMergeSameDatePs: (purchases) => {
+    // recursive function to merge purchases with same date
+    let sameIndex = purchases.findIndex((p, i) => {
+      return (
+        i < purchases.length - 1 &&
+        p.year === purchases[i + 1].year &&
+        p.month === purchases[i + 1].month
+      );
+    });
+
+    if (sameIndex >= 0) {
+      purchases[sameIndex].trees += purchases[sameIndex + 1].trees;
+      purchases.splice(sameIndex + 1, 1);
+      cOSUtil.findAndMergeSameDatePs(purchases);
+    } else {
+      return purchases;
+    }
   },
   getPurchaseDate: (purchase, unix = false) => {
     // return purchase date obj or unix time
     let date = new Date(purchase.year, purchase.month, 1);
     return unix === "unix" ? date.getTime() : date;
   },
-  getFinalMonthIndex: (firstP, lastP, treeGrowthMonths) => {
-    // calculates number of months between earliest and latest date, then adds months for last planted tree to fully grow.
-    return (
-      12 -
-      Number(firstP.month) +
-      (Number(lastP.year) - (Number(firstP.year) + 1)) * 12 +
-      Number(lastP.month) +
-      treeGrowthMonths
+  calcNumOfMonths: (p1, p2) => {
+    // calculates  of months between 2 purchases' month+year.
+    return 12 - p1.month + (p2.year - (p1.year + 1)) * 12 + p2.month;
+  },
+  buildPurchasesTracker: (purchases) => {
+    // for each purchase: calculates and stores start month index, stores trees, stores offset + cost + monthsGrown for tracking
+    let psTracker = [];
+    purchases.map((p) => {
+      psTracker.push({
+        startMonthIndex: cOSUtil.calcNumOfMonths(purchases[0], p),
+        trees: p.trees,
+        offset: 0,
+        cost: 0,
+        monthsGrown: 0,
+      });
+    });
+    return psTracker;
+  },
+  checkForNewPurchase: (currentMonthIndex, psTracker) => {
+    // checks if purchase starts this month, if so: activates it.
+    let newPurchaseIndex = psTracker.findIndex(
+      (p) => p.startMonthIndex === currentMonthIndex
     );
+    if (newPurchaseIndex >= 0)
+      return (psTracker[newPurchaseIndex].active = true);
+  },
+  checkForInflation: (m, inflationRate, costs, applyToUpkeep = false) => {
+    // every year add inflation rate to initial cost (and upkeep if enabled)
+    if (m > 0 && m % 12 === 0) {
+      costs.initial = cOSUtil.decimalFix(
+        (costs.initial * (inflationRate + 100)) / 100,
+        0
+      );
+      if (applyToUpkeep) {
+        costs.upkeep = cOSUtil.decimalFix(
+          (costs.upkeep * (inflationRate + 100)) / 100,
+          0
+        );
+      }
+      return costs;
+      /* Could put 10 year check in higher level fn to avoid calling this fn unncessarilly, but clearer this way. */
+    }
+  },
+  decimalFix: (num, dPlaces = 2) => {
+    return Number(num.toFixed(dPlaces));
+  },
+  getUnixDate: (date, m) => {
+    if (m > 0) date.setUTCMonth(date.getUTCMonth() + 1);
+    return date.getTime();
+  },
+  processActivePurchases: (
+    mGraphData,
+    psTracker,
+    costs,
+    monthsToFullyGrow,
+    monthlyTreeCO2Offset
+  ) => {
+    // calculates and updates 1 month incremental increase for EACH purchase's offset, costs, offset and months grown, then adds costs + offsets to months total (mGraphData)
+    return psTracker.forEach((pt, i) => {
+      if (pt.active) {
+        // update cost of purchase tracker
+        pt.cost += cOSUtil.caclCost(pt.trees, costs, pt.monthsGrown);
+
+        // update offset
+        pt.offset = cOSUtil.calcOffset(
+          pt.trees,
+          monthlyTreeCO2Offset,
+          pt.monthsGrown,
+          monthsToFullyGrow,
+          (exponential = true)
+        );
+
+        // update monthsGrown if not fully grown yet
+        if (pt.monthsGrown < monthsToFullyGrow) {
+          pt.monthsGrown++;
+        }
+
+        // add to mResult
+        mGraphData.cost += pt.cost;
+        mGraphData.offset = cOSUtil.decimalFix(
+          mGraphData.offset + pt.offset,
+          2
+        );
+      }
+    });
+  },
+  caclCost: (trees, costs, monthsGrown) => {
+    return trees * (monthsGrown > 0 ? costs.upkeep : costs.initial);
+  },
+  calcOffset: (
+    trees,
+    monthlyTreeCO2Offset,
+    monthsGrown,
+    monthsToFullyGrow,
+    exponential = false
+  ) => {
+    // calculates offset. If not fully grown, percentage of ammount grown is applied to monthly offset.
+    let result;
+    let maxOffset = trees * monthlyTreeCO2Offset;
+    if (monthsGrown === monthsToFullyGrow) {
+      result = maxOffset;
+    } else {
+      let growthPercentage = !exponential
+        ? (monthsGrown / monthsToFullyGrow) * 100
+        : (Math.pow(monthsToFullyGrow, monthsGrown / monthsToFullyGrow) /
+            monthsToFullyGrow) *
+          100;
+
+      result = (growthPercentage * maxOffset) / 100;
+
+      /* << Using fractional exponential seems to small untill 90% growth, but used anyway to 
+      compensate for trees increasing their CO2 offset as they keep growing beyond "fully grown", 
+      based on this paper https://www.nature.com/articles/nature12914 >> */
+    }
+    return cOSUtil.decimalFix(result, 2);
+    // << Can be further optimised by not assigning pt.cost once fully grown, done this way for clarity >>
+  },
+  assembleResultsObj: (
+    graphData,
+    psTracker,
+    costs,
+    annualCO2,
+    monthlyTreeCO2Offset
+  ) => {
+    // assemble results obj with graphData and calculate relevant stats.
+    // << Would be more efficient to incorporate most of these into For-Loop, however performance increase is negligible and this is clearer. >>
+
+    const getTotalTrees = (psTracker) => {
+      let total = 0;
+      psTracker.forEach((p) => (total += p.trees));
+      return total;
+    };
+
+    const calcFinalCosts = (totalTrees, costs, finalTotalCost) => {
+      let initial = totalTrees * costs.initial;
+      return {
+        initial,
+        upkeep: finalTotalCost - initial,
+        ongoingUpkeep: totalTrees * costs.upkeep,
+      };
+    };
+
+    const getNeutralDate = (graphData, monthlyCO2) => {
+      // find date when carbon neutrality is achieved
+      let neutralMonth = graphData.find((m) => m.offset >= monthlyCO2);
+      return neutralMonth !== undefined ? neutralMonth.date : null;
+    };
+
+    const calcTreesNeeded = (totalTrees, monthlyCO2, monthlyTreeCO2Offset) => {
+      // calc trees needed for carbon neutrality (negative number indicates extra)
+      return Math.ceil(monthlyCO2 / monthlyTreeCO2Offset) - totalTrees;
+    };
+
+    let totalTrees = getTotalTrees(psTracker);
+    let monthlyCO2 = cOSUtil.decimalFix(annualCO2 / 12, 2);
+
+    return {
+      graphData,
+      totalTime: {
+        years: Math.round(graphData.length / 12),
+        months: graphData.length % 12,
+      },
+      totalTrees,
+      costs: calcFinalCosts(
+        totalTrees,
+        costs,
+        graphData[graphData.length - 1].cost
+      ),
+      monthlyCO2Offset: Math.round(graphData[graphData.length - 1].offset),
+      monthlyCO2emmissions: Math.round(monthlyCO2),
+      carbonNeutralDate: getNeutralDate(graphData, monthlyCO2),
+      treesNeeded: calcTreesNeeded(
+        totalTrees,
+        monthlyCO2,
+        monthlyTreeCO2Offset
+      ),
+    };
   },
 };
 
