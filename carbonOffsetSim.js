@@ -14,14 +14,6 @@ const cOSUtil = require("./util/carbonOffsetSimUtil");
     5. Assemble and return result's object, including graphData and calculated stats. 
   */
 
-const decimalFix = require("./util/decimalFix");
-
-// const data = {
-//   annualCO2: 1000,
-//   purchases: [{ month: 0, year: 2024, trees: 1 }],
-//   inflationRate: "",
-// };
-
 const carbonOffsetSim = (data) => {
   try {
     const { purchases, annualCO2, inflationRate } = data;
@@ -95,8 +87,5 @@ const carbonOffsetSim = (data) => {
     return { error };
   }
 };
-
-// let res = carbonOffsetSim(data);
-// console.log(res);
 
 module.exports = carbonOffsetSim;
