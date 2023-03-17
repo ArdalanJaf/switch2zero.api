@@ -249,24 +249,35 @@ const cOSUtil = {
     // << Would be more efficient to incorporate most of these into For-Loop, however performance increase is negligible and this is clearer. >>
 
     const getTotalTrees = (psTracker) => {
+      // if no neutrality is reached, take total trees planted as a whole
       let total = 0;
-      psTracker.forEach((p) => (total += p.trees));
+
+      psTracker.forEach((pt) => (total += pt.trees));
+
       return total;
     };
 
-    const calcFinalCosts = (totalTrees, costs, finalTotalCost) => {
+    const calcFinalCosts = (
+      totalTrees,
+      costs,
+      neutralMonthObj,
+      finalTotalCost
+    ) => {
+      //if there is carbon neutrality is achieved, use those stats instead.
+
       let initial = totalTrees * costs.initial;
       return {
         initial,
-        upkeep: finalTotalCost - initial,
+        upkeep:
+          ((neutralMonthObj && neutralMonthObj.costs) || finalTotalCost) -
+          initial,
         ongoingUpkeep: totalTrees * costs.upkeep,
       };
     };
 
-    const getNeutralDate = (graphData, monthlyCO2) => {
+    const getNeutralDate = (neutralMonthObj) => {
       // find date when carbon neutrality is achieved
-      let neutralMonth = graphData.find((m) => m.offset >= monthlyCO2);
-      return neutralMonth !== undefined ? neutralMonth.date : null;
+      return neutralMonthObj !== undefined ? neutralMonthObj.date : null;
     };
 
     const calcTreesNeeded = (totalTrees, monthlyCO2, monthlyTreeCO2Offset) => {
@@ -276,6 +287,9 @@ const cOSUtil = {
 
     let totalTrees = getTotalTrees(psTracker);
     let monthlyCO2 = cOSUtil.decimalFix(annualCO2 / 12, 2);
+    let neutralMonthIndex = graphData.findIndex((m) => m.offset >= monthlyCO2);
+    let neutralMonthObj =
+      neutralMonthIndex >= 0 ? graphData[neutralMonthIndex] : undefined;
 
     return {
       graphData,
@@ -284,14 +298,16 @@ const cOSUtil = {
         months: graphData.length % 12,
       },
       totalTrees,
+
+      monthlyCO2Offset: graphData[graphData.length - 1].offset,
+      monthlyCO2Emmissions: monthlyCO2,
+      carbonNeutralDate: getNeutralDate(neutralMonthObj),
       costs: calcFinalCosts(
         totalTrees,
         costs,
+        neutralMonthObj,
         graphData[graphData.length - 1].cost
       ),
-      monthlyCO2Offset: Math.round(graphData[graphData.length - 1].offset),
-      monthlyCO2emmissions: Math.round(monthlyCO2),
-      carbonNeutralDate: getNeutralDate(graphData, monthlyCO2),
       treesNeeded: calcTreesNeeded(
         totalTrees,
         monthlyCO2,

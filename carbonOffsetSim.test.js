@@ -74,7 +74,7 @@ const data = {
       totalTrees: 1,
       costs: { initial: 12000, upkeep: 72000, ongoingUpkeep: 1200 },
       monthlyCO2Offset: 2,
-      monthlyCO2emmissions: 83,
+      monthlyCO2Emmissions: 83,
       carbonNeutralDate: null,
       treesNeeded: 35,
     },
@@ -83,9 +83,9 @@ const data = {
     problem: {
       annualCO2: "5500",
       purchases: [
-        { month: 0, year: 2024, trees: 23 }, //month 0, trees 33
-        { month: 3, year: 2024, trees: 21 }, //month 3, trees 22
-        { month: 5, year: 2025, trees: 10 }, //
+        { month: 0, year: 2024, trees: 23 },
+        { month: 3, year: 2024, trees: 21 },
+        { month: 5, year: 2025, trees: 10 },
         { month: 8, year: 2025, trees: 32 },
         { month: 0, year: 2026, trees: 55 },
         { month: 0, year: 2927, trees: 21 },
