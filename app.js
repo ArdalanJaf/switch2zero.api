@@ -9,7 +9,7 @@ app.use(cors());
 
 app.use("/", router);
 
-const port = process.env.PORT || 6011;
+const port = process.env.PORT || 6012;
 
 app.listen(port, () => {
   console.log(`server is running on port: ${port}`);

@@ -184,13 +184,13 @@ const cOSUtil = {
         // update cost of purchase tracker
         pt.cost += cOSUtil.caclCost(pt.trees, costs, pt.monthsGrown);
 
-        // update offset
+        // update offset (true = use fractional exponential growth)
         pt.offset = cOSUtil.calcOffset(
           pt.trees,
           monthlyTreeCO2Offset,
           pt.monthsGrown,
-          monthsToFullyGrow,
-          (exponential = true)
+          monthsToFullyGrow
+          // true
         );
 
         // update monthsGrown if not fully grown yet
@@ -223,15 +223,16 @@ const cOSUtil = {
     if (monthsGrown === monthsToFullyGrow) {
       result = maxOffset;
     } else {
-      let growthPercentage = !exponential
-        ? (monthsGrown / monthsToFullyGrow) * 100
-        : (Math.pow(monthsToFullyGrow, monthsGrown / monthsToFullyGrow) /
-            monthsToFullyGrow) *
-          100;
+      const evenGrowth = (monthsGrown / monthsToFullyGrow) * 100;
+      const fractionalExponential =
+        (Math.pow(monthsToFullyGrow, monthsGrown / monthsToFullyGrow) /
+          monthsToFullyGrow) *
+        100;
 
+      let growthPercentage = !exponential ? evenGrowth : fractionalExponential;
       result = (growthPercentage * maxOffset) / 100;
 
-      /* << Using fractional exponential seems to small untill 90% growth, but used anyway to 
+      /* << Using fractional exponential seems too small untill 90% growth, but used anyway to 
       compensate for trees increasing their CO2 offset as they keep growing beyond "fully grown", 
       based on this paper https://www.nature.com/articles/nature12914 >> */
     }
