@@ -1,3 +1,4 @@
+const dotenv = require("dotenv").config(); // for local testing
 const express = require("express");
 const bodyParser = require("body-parser");
 const cors = require("cors");
