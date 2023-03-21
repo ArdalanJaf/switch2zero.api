@@ -42,6 +42,20 @@ const queries = {
                         WHERE id = 1;
   `;
   },
+  checkUserAndPassword: function (username, password) {
+    return `SELECT count(*) AS count, id AS userId FROM login 
+                WHERE username = "${username}" 
+                  AND password = "${password}";`;
+  },
+  setToken: function (userId, token) {
+    return `INSERT INTO tokens (user_id, token) VALUES ("${userId}", "${token}");`;
+  },
+  checkUserToken: function (token) {
+    return `SELECT user_id AS userId FROM tokens WHERE token = "${token}";`;
+  },
+  deleteTokenById: function (userId) {
+    return `DELETE from tokens WHERE user_id = ${userId};`;
+  },
 };
 
 module.exports = queries;

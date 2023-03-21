@@ -1,8 +1,8 @@
 const cOSUtil = {
-  validateData: (data, max_annual_purchase) => {
+  validateData: (data, maxTrees) => {
     // validates annualCO2 and purchases, returns true or object of errors
     let aCO2Error = cOSUtil.annualCO2ErrCheck(data.annualCO2); // return null if no errors, or array of errors
-    let pErrors = cOSUtil.purchasesErrCheck(data.purchases); // return null if no error, or true
+    let pErrors = cOSUtil.purchasesErrCheck(data.purchases, maxTrees); // return null if no error, or true
     let iRateErrors = data.inflationRate
       ? cOSUtil.inflationRateErrCheck(data.inflationRate)
       : null;
@@ -12,13 +12,15 @@ const cOSUtil = {
     if (iRateErrors !== null) errors.inflationRate = iRateErrors;
     return Object.keys(errors).length > 0 ? errors : true; // true = no errors
   },
+
   annualCO2ErrCheck: (annualCO2) => {
     // check if annualCO2 is number and above 0, if not return error message.
     return typeof annualCO2 === "number" && annualCO2 > 0
       ? null
       : "Annual CO2 emmissions must be a number above 0.";
   },
-  purchasesErrCheck: (purchases) => {
+
+  purchasesErrCheck: (purchases, maxTrees) => {
     // validates purchases are correct data type and in correct range, checks max Max trees a year is purchased.
     const errors = [];
 
@@ -61,7 +63,7 @@ const cOSUtil = {
       if (
         typeof p.trees !== "number" ||
         p.trees < 0 ||
-        !checkMaxTreesPerYear(p.year, purchases, max_annual_purchase)
+        !checkMaxTreesPerYear(p.year, purchases, maxTrees)
       )
         pError.trees = `Trees must be a number and can only purchase a maximum of ${max_annual_purchase} trees in 1 year.`;
 

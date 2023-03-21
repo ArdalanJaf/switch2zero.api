@@ -26,6 +26,7 @@ const carbonOffsetSim = (data, config) => {
       useFractionalExponential,
       applyInflationToUpkeep,
     } = config;
+    console.log(config);
 
     // VALIDATION (defensive check)
     let validatedData = cOSUtil.validateData(data, max_annual_purchase); // returns true or object of errors
