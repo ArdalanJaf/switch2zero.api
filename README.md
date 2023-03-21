@@ -30,6 +30,11 @@ Bootstrap React.
 - Bootstrap React is used for styling. It seemed the quickest solution whilst also affording me the opportunity to get to grips with a new library (I had only used Bootstrap5 before).
 - All code is clearly commented (<< comment >> = dev reflections).
 
+**Added on an extra day - use added_feats branch for both [front](https://github.com/ArdalanJaf/switch2zero/tree/added_feats) and [api](https://github.com/ArdalanJaf/switch2zero.api/tree/added_feats) repo**: 
+- Fully functioning configuration controls added.
+- Middleware security for logging into admin controls, password is stored as hashed in database.
+- Data persistence: ability to load/save data - could use a little more work for UX and robustness but fully functioning
+
 ## Possible improvement & reflections
 *Overall, my biggest critique is that I spent too much time ensuring that the simulator was clear and trying to make the styling a bit more appealing. That time could have been better spent adding more features.*
 - Given an extra half day, I would add the ability for the admin to change the simulator controls (including the aforementioned additional options I added to the simulator), persistant data and deploy the app live. I have already done all these things and know it would not take me long.
