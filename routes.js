@@ -97,3 +97,60 @@ router.post("/login", async (req, res) => {
     res.send({ status: 0, error });
   }
 });
+
+router.post("/save", async (req, res) => {
+  try {
+    let result = await connection(queries.getConfig());
+    req.body.configData = result[0];
+    await connection(queries.save(req.body));
+
+    res.send({ status: 1 });
+  } catch (error) {
+    console.log(error);
+    res.send({ status: 0, error });
+  }
+});
+
+router.get("/get_saves_list", async (req, res) => {
+  try {
+    let result = await connection(queries.getSavesList());
+    // result.map((s)=> {s.dateSaved = })
+    res.send({ status: 1, saveList: result });
+  } catch (error) {
+    console.log(error);
+    res.send({ status: 0, error });
+  }
+});
+
+router.post("/load", async (req, res) => {
+  try {
+    let saveData = await connection(queries.getSave(req.body.id));
+
+    const { formData, resultData, configData } = saveData[0];
+
+    // let result = carbonOffsetSim(
+    //   formData, configData
+    // );
+
+    res.send({
+      status: 1,
+      loaded: { form: formData, data: resultData, config: configData },
+    });
+  } catch (error) {
+    console.log(error);
+    res.send({ status: 0, error });
+  }
+});
+
+router.post("/delete", async (req, res) => {
+  try {
+    await connection(queries.delSave(req.body.id));
+
+    res.send({
+      status: 1,
+    });
+  } catch (error) {
+    console.log(error);
+    res.send({ status: 0, error });
+  }
+});

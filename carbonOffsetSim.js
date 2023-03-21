@@ -26,7 +26,6 @@ const carbonOffsetSim = (data, config) => {
       useFractionalExponential,
       applyInflationToUpkeep,
     } = config;
-    console.log(config);
 
     // VALIDATION (defensive check)
     let validatedData = cOSUtil.validateData(data, max_annual_purchase); // returns true or object of errors
@@ -89,15 +88,6 @@ const carbonOffsetSim = (data, config) => {
       graphData.push(mGraphData);
     }
 
-    let res = cOSUtil.assembleResultsObj(
-      graphData,
-      purchasesTracker,
-      costs,
-      annualCO2,
-      monthlyTreeCO2Offset
-    );
-    // console.log(res);
-    return res;
     return cOSUtil.assembleResultsObj(
       graphData,
       purchasesTracker,

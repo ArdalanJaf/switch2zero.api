@@ -12,14 +12,12 @@ const cOSUtil = {
     if (iRateErrors !== null) errors.inflationRate = iRateErrors;
     return Object.keys(errors).length > 0 ? errors : true; // true = no errors
   },
-
   annualCO2ErrCheck: (annualCO2) => {
     // check if annualCO2 is number and above 0, if not return error message.
     return typeof annualCO2 === "number" && annualCO2 > 0
       ? null
       : "Annual CO2 emmissions must be a number above 0.";
   },
-
   purchasesErrCheck: (purchases, maxTrees) => {
     // validates purchases are correct data type and in correct range, checks max Max trees a year is purchased.
     const errors = [];
@@ -154,8 +152,6 @@ const cOSUtil = {
     costs,
     applyInflationToUpkeep = false
   ) => {
-    console.log(costs.upkeep);
-
     // every year add inflation rate to initial cost (and upkeep if enabled)
     if (m > 0 && m % 12 === 0) {
       costs.initial = cOSUtil.decimalFix(

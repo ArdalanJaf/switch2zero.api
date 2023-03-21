@@ -56,6 +56,23 @@ const queries = {
   deleteTokenById: function (userId) {
     return `DELETE from tokens WHERE user_id = ${userId};`;
   },
+  save: function (save) {
+    Object.keys(save).map((k) => {
+      if (k !== "name") save[k] = JSON.stringify(save[k]);
+    });
+
+    return `INSERT INTO saves (id, name, formData, resultData, configData, dateSaved)
+    VALUES (NULL, "${save.name}", '${save.formData}', '${save.resultData}', '${save.configData}', NULL);`;
+  },
+  getSavesList: function () {
+    return `SELECT id, name, dateSaved FROM saves ORDER BY dateSaved DESC ;`;
+  },
+  getSave: function (id) {
+    return `SELECT formData, resultData, configData FROM saves WHERE id = ${id};`;
+  },
+  delSave: function (id) {
+    return `DELETE from saves WHERE id = ${id};`;
+  },
 };
 
 module.exports = queries;
