@@ -1,5 +1,5 @@
 const cOSUtil = {
-  validateData: (data) => {
+  validateData: (data, max_annual_purchase) => {
     // validates annualCO2 and purchases, returns true or object of errors
     let aCO2Error = cOSUtil.annualCO2ErrCheck(data.annualCO2); // return null if no errors, or array of errors
     let pErrors = cOSUtil.purchasesErrCheck(data.purchases); // return null if no error, or true
@@ -19,7 +19,7 @@ const cOSUtil = {
       : "Annual CO2 emmissions must be a number above 0.";
   },
   purchasesErrCheck: (purchases) => {
-    // validates purchases are correct data type and in correct range, checks max 55 trees a year is purchased.
+    // validates purchases are correct data type and in correct range, checks max Max trees a year is purchased.
     const errors = [];
 
     // << Could add check that purchases is array of objects with trees, months, years.>>
@@ -37,13 +37,13 @@ const cOSUtil = {
     const currentYear = getYear();
     const finalYear = getYear(50);
 
-    const check55TreesPerYear = (year, purchases) => {
+    const checkMaxTreesPerYear = (year, purchases, maxTrees) => {
       // << With more time would make more efficient check (rather than filtering through all purchases on each iteration) >>
       let totalTrees = 0;
       purchases
         .filter((p) => p.year === year)
         .forEach((p) => (totalTrees += p.trees));
-      return totalTrees > 55 && totalTrees ? false : true; // false = failed test - more than 55 trees in one year
+      return totalTrees > maxTrees && totalTrees ? false : true; // false = failed test - more than Max trees in one year
     };
 
     purchases.map((p, i) => {
@@ -61,10 +61,9 @@ const cOSUtil = {
       if (
         typeof p.trees !== "number" ||
         p.trees < 0 ||
-        !check55TreesPerYear(p.year, purchases)
+        !checkMaxTreesPerYear(p.year, purchases, max_annual_purchase)
       )
-        pError.trees =
-          "Trees must be a number and can only purchase a maximum of 55 trees in 1 year.";
+        pError.trees = `Trees must be a number and can only purchase a maximum of ${max_annual_purchase} trees in 1 year.`;
 
       // if any errors, add index and erroneous fields to errors arr. With more time could add specific error messages.
       if (Object.keys(pError).length > 0) {

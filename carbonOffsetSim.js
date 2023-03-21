@@ -22,12 +22,13 @@ const carbonOffsetSim = (data, config) => {
       upkeep_cost,
       annual_offset,
       growth_time,
+      max_annual_purchase,
       useFractionalExponential,
       applyInflationToUpkeep,
     } = config;
 
     // VALIDATION (defensive check)
-    let validatedData = cOSUtil.validateData(data); // returns true or object of errors
+    let validatedData = cOSUtil.validateData(data, max_annual_purchase); // returns true or object of errors
     if (validatedData !== true) return { errors: validatedData };
 
     // PREPARE purchases for iterations.
@@ -36,7 +37,10 @@ const carbonOffsetSim = (data, config) => {
 
     // CONTROLS
     let costs = { initial: initial_cost, upkeep: upkeep_cost }; // cents. in object to be able to change in util scope (for inflation rate)
-    const monthlyTreeCO2Offset = cOSUtil.decimalFix(annual_offset / 12, 2); // annual CO2 offset in KG
+    const monthlyTreeCO2Offset = cOSUtil.decimalFix(
+      annual_offset / 12 / 1000,
+      2
+    ); // annual CO2 offset in KG (stored in database as g so needs /1000)
     const monthsToFullyGrow = growth_time;
 
     // CREATE TRACKERS
