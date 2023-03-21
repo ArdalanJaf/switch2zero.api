@@ -147,14 +147,21 @@ const cOSUtil = {
     if (newPurchaseIndex >= 0)
       return (psTracker[newPurchaseIndex].active = true);
   },
-  checkForInflation: (m, inflationRate, costs, applyToUpkeep = false) => {
+  checkForInflation: (
+    m,
+    inflationRate,
+    costs,
+    applyInflationToUpkeep = false
+  ) => {
+    console.log(costs.upkeep);
+
     // every year add inflation rate to initial cost (and upkeep if enabled)
     if (m > 0 && m % 12 === 0) {
       costs.initial = cOSUtil.decimalFix(
         (costs.initial * (inflationRate + 100)) / 100,
         0
       );
-      if (applyToUpkeep) {
+      if (applyInflationToUpkeep) {
         costs.upkeep = cOSUtil.decimalFix(
           (costs.upkeep * (inflationRate + 100)) / 100,
           0
@@ -176,7 +183,8 @@ const cOSUtil = {
     psTracker,
     costs,
     monthsToFullyGrow,
-    monthlyTreeCO2Offset
+    monthlyTreeCO2Offset,
+    useFractionalExponential
   ) => {
     // calculates and updates 1 month incremental increase for EACH purchase's offset, costs, offset and months grown, then adds costs + offsets to months total (mGraphData)
     return psTracker.forEach((pt, i) => {
@@ -189,8 +197,8 @@ const cOSUtil = {
           pt.trees,
           monthlyTreeCO2Offset,
           pt.monthsGrown,
-          monthsToFullyGrow
-          // true
+          monthsToFullyGrow,
+          (exponential = useFractionalExponential ? true : false)
         );
 
         // update monthsGrown if not fully grown yet

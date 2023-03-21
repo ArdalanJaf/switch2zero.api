@@ -14,9 +14,17 @@ const cOSUtil = require("./util/carbonOffsetSimUtil");
     5. Assemble and return result's object, including graphData and calculated stats. 
   */
 
-const carbonOffsetSim = (data) => {
+const carbonOffsetSim = (data, config) => {
   try {
     const { purchases, annualCO2, inflationRate } = data;
+    const {
+      initial_cost,
+      upkeep_cost,
+      annual_offset,
+      growth_time,
+      useFractionalExponential,
+      applyInflationToUpkeep,
+    } = config;
 
     // VALIDATION (defensive check)
     let validatedData = cOSUtil.validateData(data); // returns true or object of errors
@@ -27,9 +35,9 @@ const carbonOffsetSim = (data) => {
     cOSUtil.findAndMergeSameDatePs(purchases);
 
     // CONTROLS
-    let costs = { initial: 12000, upkeep: 1200 }; // cents. in object to be able to change in util scope (for inflation rate)
-    const monthlyTreeCO2Offset = cOSUtil.decimalFix(28.5 / 12, 2); // annual CO2 offset in KG
-    const monthsToFullyGrow = 60;
+    let costs = { initial: initial_cost, upkeep: upkeep_cost }; // cents. in object to be able to change in util scope (for inflation rate)
+    const monthlyTreeCO2Offset = cOSUtil.decimalFix(annual_offset / 12, 2); // annual CO2 offset in KG
+    const monthsToFullyGrow = growth_time;
 
     // CREATE TRACKERS
     // Tracks each purchase's start month index and respective cumulative costs, offsets and monthsGrown (up to fully grown).
@@ -59,7 +67,7 @@ const carbonOffsetSim = (data) => {
           m,
           inflationRate,
           costs,
-          (applyToUpkeep = false)
+          applyInflationToUpkeep
         );
 
       // for each active purchase tracker: update values of cost, offset and months grown. Add values to mGraphData.
@@ -68,13 +76,23 @@ const carbonOffsetSim = (data) => {
         purchasesTracker,
         costs,
         monthsToFullyGrow,
-        monthlyTreeCO2Offset
+        monthlyTreeCO2Offset,
+        useFractionalExponential
       );
 
       // add month's data to graphData arr.
       graphData.push(mGraphData);
     }
 
+    let res = cOSUtil.assembleResultsObj(
+      graphData,
+      purchasesTracker,
+      costs,
+      annualCO2,
+      monthlyTreeCO2Offset
+    );
+    // console.log(res);
+    return res;
     return cOSUtil.assembleResultsObj(
       graphData,
       purchasesTracker,

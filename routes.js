@@ -7,9 +7,22 @@ const queries = require("./mySQL/queries");
 
 router.post("/", async (req, res) => {
   try {
-    let config = await connection(queries.getConfig());
+    let resultConfig = await connection(
+      queries.getConfig(
+        `initial_cost, 
+        upkeep_cost, 
+        annual_offset, 
+        growth_time, 
+        useFractionalExponential, 
+        applyInflationToUpkeep`
+      )
+    );
 
-    let result = carbonOffsetSim(req.body, config);
+    // console.log(resultConfig[0]);
+    let result = carbonOffsetSim(
+      req.body,
+      JSON.parse(JSON.stringify(resultConfig[0]))
+    );
     res.send({ status: 1, result });
   } catch (error) {
     res.send({ status: 0, error });

@@ -1,8 +1,15 @@
 const queries = {
-  getConfig: function (row = false) {
+  getConfig: function (colsStr = false) {
+    // colsStr allows only specific cols to be retrieved. eg: "initial_cost, upkeep_cost"
     return `SELECT ${
-      row ||
-      "initial_cost, upkeep_cost, annual_offset, growth_time, max_annual_purchase, useFractionalExponential, applyInterestToUpkeep"
+      colsStr ||
+      `initial_cost, 
+      upkeep_cost, 
+      annual_offset, 
+      growth_time, 
+      max_annual_purchase, 
+      useFractionalExponential, 
+      applyInflationToUpkeep`
     }
                   FROM config
                       WHERE id = 1;`;
@@ -19,7 +26,7 @@ const queries = {
     return `UPDATE config  
                   SET 
                   ${createSetStr(obj)} 
-                      WHERE id=1;
+                      WHERE id = 1;
       `;
   },
   resetConfig: function (obj) {
@@ -31,7 +38,7 @@ const queries = {
                   growth_time=DEFAULT,
                   max_annual_purchase=DEFAULT,
                   useFractionalExponential=DEFAULT,
-                  applyInterestToUpkeep=DEFAULT
+                  applyInflationToUpkeep=DEFAULT
                         WHERE id = 1;
   `;
   },
