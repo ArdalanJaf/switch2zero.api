@@ -13,7 +13,7 @@ Node.js,
 Axios,
 Jest,
 Recharts,
-Bootstrap React.
+Bootstrap React, mySQL.
 
 ## Features
 - Form allows user to select average CO2 output based on country, or input their own custom value. 
