@@ -63,7 +63,7 @@ const cOSUtil = {
         p.trees < 0 ||
         !checkMaxTreesPerYear(p.year, purchases, maxTrees)
       )
-        pError.trees = `Trees must be a number and can only purchase a maximum of ${max_annual_purchase} trees in 1 year.`;
+        pError.trees = `Trees must be a number and can only purchase a maximum of ${maxTrees} trees in 1 year.`;
 
       // if any errors, add index and erroneous fields to errors arr. With more time could add specific error messages.
       if (Object.keys(pError).length > 0) {
